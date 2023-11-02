@@ -2,18 +2,21 @@ package com.factoriaf5.myfavoriteimages.domain.services;
 
 import com.factoriaf5.myfavoriteimages.domain.models.MyImage;
 import com.factoriaf5.myfavoriteimages.infra.repositories.IMyImageRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
 public class MyImageService {
 
     private final IMyImageRepository myImageRepository;
+    private final CloudinaryImageService cloudinaryImageService;
 
-    public MyImageService(IMyImageRepository myImageRepository) {
+    public MyImageService(IMyImageRepository myImageRepository, CloudinaryImageService cloudinaryImageService) {
         this.myImageRepository = myImageRepository;
+        this.cloudinaryImageService = cloudinaryImageService;
     }
 
     public List<MyImage> findAll() {
@@ -26,21 +29,29 @@ public class MyImageService {
         return optionalCharacter.get();
     }
 
-    public MyImage create(MyImage image) {
-        return this.myImageRepository.save(image);
+    public MyImage create(String title, String description, MultipartFile image) throws IOException {
+        String imageUrl = (String) cloudinaryImageService.upload(image).get("url");
+
+        MyImage project = new MyImage(title, description, imageUrl);
+        return myImageRepository.save(project);
     }
 
     public void delete(Long id) {
         this.myImageRepository.deleteById(id);
     }
 
-    public MyImage update(Long id, MyImage updatedImage) {
+    public MyImage update(Long id, String title, String description, MultipartFile image) throws IOException {
         MyImage existingImage = this.findById(id);
 
-        existingImage.setTitle(updatedImage.getTitle());
-        existingImage.setDescription(updatedImage.getDescription());
-        existingImage.setImage(updatedImage.getImage());
+        if (existingImage != null) {
+            String imageUrl = (String) cloudinaryImageService.upload(image).get("url");
 
-        return myImageRepository.save(existingImage);
+            existingImage.setTitle(title);
+            existingImage.setDescription(description);
+            existingImage.setImage(imageUrl);
+
+            return myImageRepository.save(existingImage);
+        }
+        return null;
     }
 }
