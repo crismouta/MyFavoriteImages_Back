@@ -2,6 +2,7 @@ package com.factoriaf5.myfavoriteimages.domain.services;
 
 import com.factoriaf5.myfavoriteimages.domain.models.MyImage;
 import com.factoriaf5.myfavoriteimages.infra.repositories.IMyImageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,8 +12,10 @@ import java.util.List;
 @Service
 public class MyImageService {
 
-    private final IMyImageRepository myImageRepository;
-    private final CloudinaryImageService cloudinaryImageService;
+    @Autowired
+    private IMyImageRepository myImageRepository;
+    @Autowired
+    private CloudinaryImageService cloudinaryImageService;
 
     public MyImageService(IMyImageRepository myImageRepository, CloudinaryImageService cloudinaryImageService) {
         this.myImageRepository = myImageRepository;
